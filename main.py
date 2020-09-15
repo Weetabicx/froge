@@ -14,4 +14,3 @@ with open("config.json", "r") as data:  # Opens a file in read mode
 	config = json.load(data)  # Loads file as a json
 
 froge.run(config["token"])  # Runs the bot with specified token
-6

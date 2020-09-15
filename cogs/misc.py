@@ -1,8 +1,8 @@
 from discord.ext import commands as com
 import discord as d
 from random import randint
-import typing as t
 from datetime import datetime as dt
+import typing as t
 
 
 class MiscCommands(com.Cog):  # Creates class with inheritance from a module class
@@ -26,6 +26,14 @@ class MiscCommands(com.Cog):  # Creates class with inheritance from a module cla
 	async def time(slef, ctx):  # Defines function to become a command
 		time = dt.utcnow()
 		await ctx.send(embed=d.Embed(color=d.Color(65408), title="The current UTC time is: {0} | The date is: {1}".format(time.strftime("%X"), time.strftime("%x"))))
+
+	@com.command()  # Creats a command object
+	async def avatar(self, ctx, user: t.Optional[d.User]):  # Defines function to become a command
+
+		specified = user or ctx.author
+		avatar = d.Embed()  # Creates embed
+		avatar.set_image(url=specified.avatar_url)  # Sets image embed
+		await ctx.send(embed=avatar)  # Sends an embed containing the avatar
 
 
 def setup(bot):  # Defines setup functiuon for cog

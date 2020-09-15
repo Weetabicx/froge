@@ -3,6 +3,7 @@ from discord.ext import commands as com
 import discord as d
 import typing as t
 from datetime import datetime as dt, timedelta as td
+import re
 
 
 class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
@@ -17,7 +18,8 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 		self.against_vote = {}  # Creates an empty dict for storing votes against
 		self.has_voted = {}  # A dict which stores a list for each guild with a vote running
 
-	def guild_vote_reset(self, guild_id):  # Resets the values for the vote for a guild
+	def guild_vote_reset(self, guild_id):
+		"""Resets the guilds vote"""
 		self.vote_msg.pop(guild_id)
 		self.vote_timers.pop(guild_id)
 		self.vote_subject.pop(guild_id)
@@ -28,20 +30,36 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 		self.has_voted.pop(guild_id)
 
 	@com.group(case_insensative=True, invoke_without_command=True)  # Creates command group
-	async def vote(self, ctx, votes: t.Optional[int] = 10, timer: t.Optional[int] = 10, *, subject: str):  # Creates function to become a command
+	async def vote(self, ctx, votes: t.Optional[int] = 10, timer: t.Optional[str] = "15m", *, subject: str):  # Creates function to become a command
 
 		is_running = self.voteisrunning.get(ctx.guild.id)  # Get's a value
 		if is_running is True:  # Is a vote already running?
 			return  # Stops the program
 
-		self.vote_timers[ctx.guild.id] = dt.utcnow() + td(minutes=timer)  # Assigns the timer value
+		match = re.search("^(\d+)(hr|m)?$", timer, re.IGNORECASE)
+		number = match.group(1)  # Assigns the matched
+		unit = match.group(2)
+		if unit is None:
+			unit == "m"
+
+		if unit == "hr" and int(number) > 24:
+			return await ctx.send(d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))
+		elif unit == "m" and int(number) < 10:
+			return await ctx.send(d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))
+		else:
+			if unit == "m":
+				time_to_be_added = int(number)
+				self.vote_timers[ctx.guild.id] = dt.utcnow() + td(minutes=time_to_be_added)
+			elif unit == "hr":
+				time_to_be_added = int(number)
+				self.vote_timers[ctx.guild.id] = dt.utcnow() + td(hours=time_to_be_added)
 
 		vote_embed = d.Embed(color=d.Color(65408))  # Creates the initial discord embed
 		vote_embed.title = "Vote for {0}".format(subject)  # Adds the title specifing the vote topic
 		vote_embed.description = "Max number of votes: {}".format(votes)  # Adds the description which includes the max vote
 		vote_embed.add_field(name="For", value=0, inline=True)  # Adds the for field which will be updated with each new vote
 		vote_embed.add_field(name="Against", value=0, inline=True)  # Adds the against field which will be updated with each new vote
-		vote_embed.set_footer(text="Vote end time: {}".format(self.vote_timers[ctx.guild.id].strftime("%x %X")))
+		vote_embed.set_footer(text="Vote end time: UTC - {}".format(self.vote_timers[ctx.guild.id].strftime("%x %X")))  # Shows utc time
 
 		self.vote_subject[ctx.guild.id] = subject  # Assigns the subject value
 		self.votes[ctx.guild.id] = votes  # Assign the max vote
@@ -66,6 +84,7 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 		for_votes = self.for_vote.get(ctx.guild.id)
 		against_votes = self.against_vote.get(ctx.guild.id)
 		max_votes = self.votes.get(ctx.guild.id)
+
 		vote_embed = d.Embed(color=d.Color(65408))  # Creates the initial discord embed
 		if for_votes > against_votes:  # If greater number of for votes
 			vote_embed.title = "Vote for {0} has ended | Against Wins!".format(self.vote_subject.get(ctx.guild.id))  # Adds the title specifing the vote topic
@@ -77,14 +96,14 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 			vote_embed.description = "Max number of votes: {}".format(max_votes)  # Adds the description which includes the max vote
 			vote_embed.add_field(name="For", value=for_votes, inline=True)  # Adds the for field which will be updated with each new vote
 			vote_embed.add_field(name="Against", value=against_votes, inline=True)  # Adds the against field which will be updated with each new vote
-			vote_embed.set_footer(text="Vote end time: {}".format(self.vote_timers[ctx.guild.id].strftime("%x %X")))
+			vote_embed.set_footer(text="Vote end time: {}".format(self.vote_timers[ctx.guild.id].strftime("%x %X")))  # Formats and sends the vote end time
 
 		self.guild_vote_reset(ctx.guild.id)  # Resets values since the vote has ended
 
 	@vote.command(aliases=["current"])  # Creates command object
 	async def now(self, ctx):  # Defines function to be command
-		if ctx.guild is None:
-			return
+		if ctx.guild is None:  # If there is no guild
+			return  # Stops the function
 		vote_status = self.voteisrunning.get(ctx.guild.id)  # Get's the boolean which determines if a vote is running
 		if vote_status is None:  # If there is no bollean
 			return  # Stops the function
@@ -163,11 +182,11 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 					vote_embed.description = "Max number of votes: {}".format(max_votes)  # Adds the description which includes the max vote
 					vote_embed.add_field(name="For", value=for_votes, inline=True)  # Adds the for field which will be updated with each new vote
 					vote_embed.add_field(name="Against", value=against_votes, inline=True)  # Adds the against field which will be updated with each new vote
-					vote_embed.set_footer(text="Vote end time: {}".format(self.vote_timers[message.guild.id].strftime("%x %X")))
+					vote_embed.set_footer(text="Vote end time: {}".format(self.vote_timers[message.guild.id].strftime("%x %X")))  # Sends formatted time
 
 					self.guild_vote_reset(message.guild.id)  # Resets values since the vote has ended
 
-				elif for_votes + against_votes < max_votes:
+				elif for_votes + against_votes < max_votes:  # If the vote is still ongoing
 					current_message = self.vote_msg.get(message.guild.id)  # Get's the current vote message
 					await current_message.delete()  # Deletes the current vote message
 
@@ -180,7 +199,6 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 					self.vote_msg[message.guild.id] = await message.channel.send(embed=vote_embed)  # Sends the vote embed
 				else:  # max number of votes has been reached
 					return  # Stops the function
-
 
 
 def setup(bot):  # Defines bot setup
