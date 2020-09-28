@@ -1,3 +1,3 @@
 config.json
 media/
-__pycache__/
+cogs/__pycache__
