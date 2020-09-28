@@ -1,2 +1,0 @@
-# froge
-Refined discord bot
