@@ -35,6 +35,20 @@ class MiscCommands(com.Cog):  # Creates class with inheritance from a module cla
 		avatar.set_image(url=specified.avatar_url)  # Sets image embed
 		await ctx.send(embed=avatar)  # Sends an embed containing the avatar
 
+	@com.command()
+	async def mute(self, ctx, target: d.Member):
+		mute = None
+
+		for role in ctx.guild.roles:
+			if role.name == "Muted":
+				mute = role
+				break
+
+		if mute is None:
+			mute = await ctx.guild.create_role(name="Muted", permissions=None)  # Creates muted role with no permissions
+
+		await target.add_roles(mute)
+
 
 def setup(bot):  # Defines setup functiuon for cog
 	bot.add_cog(MiscCommands(bot))  # Specifies class to be added as a cog

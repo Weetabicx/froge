@@ -1,0 +1,13 @@
+{
+	"movies": {
+		"The Avengers": "The Avengers",
+		"Black Panther": "Black Panther",
+		"X-men": "X-men"
+
+	},
+	"character": {
+		"Iron Man": "Iron Man",
+		"Black Panther": "Black Panther",
+		"Wolverine": "Wolverine"
+	}
+}
