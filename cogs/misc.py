@@ -24,30 +24,22 @@ class MiscCommands(com.Cog):  # Creates class with inheritance from a module cla
 
 	@com.command(aliases=["clock"])  # Creates a command object with aliases
 	async def time(slef, ctx):  # Defines function to become a command
-		time = dt.utcnow()
+		time = dt.utcnow()  # Assigns utc time
 		await ctx.send(embed=d.Embed(color=d.Color(65408), title="The current UTC time is: {0} | The date is: {1}".format(time.strftime("%X"), time.strftime("%x"))))
 
 	@com.command()  # Creats a command object
 	async def avatar(self, ctx, user: t.Optional[d.User]):  # Defines function to become a command
 
 		specified = user or ctx.author
-		avatar = d.Embed()  # Creates embed
+		avatar = d.Embed(color=d.Color(65408))  # Creates embed
 		avatar.set_image(url=specified.avatar_url)  # Sets image embed
 		await ctx.send(embed=avatar)  # Sends an embed containing the avatar
 
-	@com.command()
-	async def mute(self, ctx, target: d.Member):
-		mute = None
+	@com.command()  # Decorator with makes a function into a discord command
+	async def age(self, ctx):
 
-		for role in ctx.guild.roles:
-			if role.name == "Muted":
-				mute = role
-				break
-
-		if mute is None:
-			mute = await ctx.guild.create_role(name="Muted", permissions=None)  # Creates muted role with no permissions
-
-		await target.add_roles(mute)
+		specified = ctx.author
+		await ctx.send(embed=d.Embed(color=d.Color(65408), description=specified.created_at.strftime("%c")))
 
 
 def setup(bot):  # Defines setup functiuon for cog

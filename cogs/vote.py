@@ -1,4 +1,4 @@
-# Imports required modules with keyword
+# Imports required modules with aliases
 from discord.ext import commands as com
 import discord as d
 import typing as t
@@ -36,24 +36,26 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 		if is_running is True:  # Is a vote already running?
 			return  # Stops the program
 
-		match = re.search("^(\d+)(hr|m)?$", timer, re.IGNORECASE)
-		number = match.group(1)  # Assigns the matched
+		match = re.search(r"^(\d+)(d|hr|m|s)?$", timer, re.IGNORECASE)
+		number = int(match.group(1))  # Assigns the matched
 		unit = match.group(2)
 		if unit is None:
 			unit == "m"
 
-		if unit == "hr" and int(number) > 24:
-			return await ctx.send(d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))
-		elif unit == "m" and int(number) < 10:
-			return await ctx.send(d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))
-		else:
-			if unit == "m":
-				time_to_be_added = int(number)
-				self.vote_timers[ctx.guild.id] = dt.utcnow() + td(minutes=time_to_be_added)
-			elif unit == "hr":
-				time_to_be_added = int(number)
-				self.vote_timers[ctx.guild.id] = dt.utcnow() + td(hours=time_to_be_added)
-
+		if unit == "hr" and number > 24:  # Checks for invalid time input
+			return await ctx.send(d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))  # Sends input rejections message
+		elif unit == "m" and number < 10:# Checks for invalid time input
+			return await ctx.send(d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))  # Sends input rejections message
+		elif unit == "d" and number != 1:# Checks for invalid time input
+			return await ctx.send(d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))  # Sends input rejections message
+		else:  # If input is valid
+			if unit == "m":  # Checks unit of time
+				self.vote_timers[ctx.guild.id] = dt.utcnow() + td(minutes=number)
+			elif unit == "hr":  # Checks unit of time
+				self.vote_timers[ctx.guild.id] = dt.utcnow() + td(hours=number)
+			elif unit == "d":
+				self.vote_timers[ctx.guild.id] = dt.utcnow() + td(days=number)
+				
 		vote_embed = d.Embed(color=d.Color(65408))  # Creates the initial discord embed
 		vote_embed.title = "Vote for {0}".format(subject)  # Adds the title specifing the vote topic
 		vote_embed.description = "Max number of votes: {}".format(votes)  # Adds the description which includes the max vote
