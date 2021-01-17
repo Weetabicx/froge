@@ -6,7 +6,7 @@ froge = com.Bot(command_prefix=["f!", "f>", "f?", "f%"], case_insensitive=True) 
 froge.remove_command("help")  # Removes the default help commmand
 
 # Loading each cog in a loop
-cogs = ["help", "misc", "vote", "hangman"]  # Filename of each cog
+cogs = ["help","feeder", "hangman", "misc", "vote", "blacklivesmatter", "presence"]  # Filename of each cog
 for cog in cogs:  # For each specified filename
 	froge.load_extension('cogs.{}'.format(cog))  # Load the file as an extension to the bot
 
