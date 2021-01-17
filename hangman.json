@@ -1,13 +1,14 @@
 {
 	"movies": {
-		"The Avengers": "The Avengers",
-		"Black Panther": "Black Panther",
-		"X-men": "X-men"
+		"the avengers": ["A group of superheors", "Not from the DC universe", "Move release in 2012"]
 
 	},
+
 	"character": {
-		"Iron Man": "Iron Man",
-		"Black Panther": "Black Panther",
-		"Wolverine": "Wolverine"
+		"iron man": ["A marvel superhero", "Produced an electromagnet to save his life", "Based on Howard Hughes"]
+	},
+
+	"series": {
+		"adventure time": ["One of the main charcters is a dog", "One of the main characters was belived to be the only human left", "The story is set in the Land of Ooo"]
 	}
 }
