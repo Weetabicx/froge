@@ -1,7 +1,7 @@
 from discord.ext import commands as com  # Import commands
 import json
 
-froge = com.Bot(command_prefix=["f!", "f>", "f?", "f%"], case_insensitive=True)  # Specifies commands prefix and case sensativity
+froge = com.Bot(command_prefix=["%"], case_insensitive=True)  # Specifies commands prefix and case sensativity
 
 froge.remove_command("help")  # Removes the default help commmand
 

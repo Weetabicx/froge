@@ -45,7 +45,7 @@ class feeder(commands.Cog):  # Defines the command class with inheritance
 					New_data['sololeveling'] = 1 + last_chapter  # Populates data block
 					json.dump(New_data, outfile, indent=4)  # Writes to file
 
-			await self.channel.send(f"@eveyone {chapter.link}")  # Sends message to user
+			await self.channel.send(f"@eveyone {chapter.link}")  # Sends message to channel
 
 	@sololevelingRSS.before_loop  # Runs the defined function before the loop starts
 	async def before_sololevelingRSS(self):  # Defines function to run

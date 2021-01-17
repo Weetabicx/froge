@@ -1,15 +1,16 @@
 from discord.ext import commands as com
 import discord as d
-from random import randint
+import random
 from datetime import datetime as dt
 import typing as t
+from cogs.utils.readable_time import readable_time
 
 
 class MiscCommands(com.Cog):  # Creates class with inheritance from a module class
 	def __init__(self, bot):  # Defines initialise function
 		self.bot = bot
 
-	@com.command(aliases=["cf", "flip"])  # Creates a command object
+	@com.command(aliases=["flip"])  # Creates a command object
 	async def coinflip(self, ctx):
 		"""Flips a coin"""
 		chance = randint(0, 6000)  # Ramdom number
@@ -41,6 +42,29 @@ class MiscCommands(com.Cog):  # Creates class with inheritance from a module cla
 		specified = ctx.author
 		await ctx.send(embed=d.Embed(color=d.Color(65408), description=specified.created_at.strftime("%c")))
 
+	@com.cooldown(1, 86_400, com.BucketType.user)
+	@com.command()
+	async def swag(self, ctx):
+		swag_factor = random.uniform(-100, 100)
+		message = ""
+		if swag_factor > 90:
+			message = random.choice(["You are so smexy", "I am envious of your swag", "I am in absolute AWE!"])
+		elif swag_factor <=90 and swag_factor > 50:
+			message = random.choice(["You are pretty swag! nice.", "That's a reasonable amount of swag you have", "Decent swag!"])
+		elif swag_factor <=50 and swag_factor >=-50:
+			message = random.choice(["Your swag is below averge. YIKES!", "Eww, I hope you don't stay long.", "You are shunned by your friends and family..."])
+		elif swag_factor >=-90 and swag_factor <-50:
+			message = random.choice(["This is a amazingly terrible amount of swag...", "You should rethink your life choices...", "You are not swag, like even remotely..."])
+		elif swag_factor <-90:
+			message = random.choice(["How are you even like this????", "What have you done with your life...", "This is genuinely sad..."])
+
+		await ctx.send(f"you have a swag factor of {swag_factor}! {message}")
+
+	@swag.error
+	async def swag_error(self, ctx, error):
+		if isinstance(error, com.CommandOnCooldown):
+
+			await ctx.send(f"This command is on cooldown. Try again in {readable_time(round(error.retry_after, 0))}")
 
 def setup(bot):  # Defines setup functiuon for cog
 	bot.add_cog(MiscCommands(bot))  # Specifies class to be added as a cog
