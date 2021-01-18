@@ -23,6 +23,5 @@ def readable_time(inital):
 	if inital > 0:
 		seconds = inital
 		inital -= seconds
+		
 	return f"{days} day(s), {hours} hour(s), {minutes} minute(s), {seconds} second(s)"
-
-print(readable_time(1000))

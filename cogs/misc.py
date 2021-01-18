@@ -63,8 +63,15 @@ class MiscCommands(com.Cog):  # Creates class with inheritance from a module cla
 	@swag.error
 	async def swag_error(self, ctx, error):
 		if isinstance(error, com.CommandOnCooldown):
-
 			await ctx.send(f"This command is on cooldown. Try again in {readable_time(round(error.retry_after, 0))}")
+
+	@com.command()
+	async def dababy(self, ctx):
+		dababies = [511490437853478925, 266999593084911616]
+		if ctx.author.id in dababies:
+			await ctx.send("You are dababy")
+		else:
+			await ctx.send("You are not dababy")
 
 def setup(bot):  # Defines setup functiuon for cog
 	bot.add_cog(MiscCommands(bot))  # Specifies class to be added as a cog
