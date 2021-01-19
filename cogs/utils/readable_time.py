@@ -23,5 +23,14 @@ def readable_time(inital):
 	if inital > 0:
 		seconds = inital
 		inital -= seconds
-		
-	return f"{days} day(s), {hours} hour(s), {minutes} minute(s), {seconds} second(s)"
+
+	if days == 0:
+		if hours == 0:
+			if minutes == 0:
+				return f'{seconds} second(s)'
+			return f'{minutes} minute(s), {seconds} second(s)'
+		return f'{hours} hour(s), {minutes} minute(s), {seconds} second(s)'
+	else:
+		return f"{days} day(s), {hours} hour(s), {minutes} minute(s), {seconds} second(s)"
+
+
