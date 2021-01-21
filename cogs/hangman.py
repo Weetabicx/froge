@@ -10,6 +10,7 @@ class Hangman(commands.Cog):  # Creates a class with inheritance from Cog class 
 		self.bot = bot  # Assigns the bot variable to a wider class scope
 		self.word = {}  # Stores the word specific to the user (Potentionally guild)
 		self.hints = {}  # Stores the hints specific to the user (Potentionally guild)
+		self.current_hint = {}
 		self.hidden_word = {}  # Stores the displayed word to the user (Potentionally guild)
 		self.guessed = {}  # Stores the guessed word to the user (Potentionally guild)
 		self.guesses = {}  # Stores the guesses remaining to the user (Potentionally guild)
@@ -51,6 +52,7 @@ class Hangman(commands.Cog):  # Creates a class with inheritance from Cog class 
 		self.guesses[ctx.author.id] = 6  # Assigns the number of guesses to the same number of attempts as a regular hangman game
 		self.hidden_word[ctx.author.id] = ""  # Creates the inital empty string
 		self.guessed[ctx.author.id] = []  # Creates the initall empty list
+		self.current_hint[ctx.author.id] = 0
 
 		for index, char in enumerate(self.word.get(ctx.author.id)):  # For each character in the stored word
 			if char == " ":  # If the character is a space
@@ -74,63 +76,73 @@ class Hangman(commands.Cog):  # Creates a class with inheritance from Cog class 
 			return  # Ignore and stop running
 		if not(self.running.get(message.author.id)):  # If there is no game tied to this user
 			return  # Ignore and stop running
-		if not(message.content.lower().startswith("guess")):  # Returns if the message doesn't start with guess
-			return  # Ignores and stops running 
 
-		
-		try:  # Tries to get a guessed letter
-			attempt = message.content.lower().split(" ")  # Splits the message into words
-			if len(attempt) > 2:  # If the guess is for the whole word
-				attempt = " ".join(attempt[1:])  # Join the seperate words into one attempt
-			else:  # If only a letter is guessed
-				attempt = attempt[1]  # Assign it to the letter
-		except ValueError:  # If the message only containted "guess"
-			return await message.author.send("A letter or word was not specified")  # Send error message
+		if message.content.lower().startswith("guess"):
 
-		if attempt in self.guessed.get(message.author.id):  # If the guess has already been submitted
-			return await message.author.send("You have already guessed this!")  # Sends error message
+			try:  # Tries to get a guessed letter
+				attempt = message.content.lower().split(" ")  # Splits the message into words
+				if len(attempt) > 2:  # If the guess is for the whole word
+					attempt = " ".join(attempt[1:])  # Join the seperate words into one attempt
+				else:  # If only a letter is guessed
+					attempt = attempt[1]  # Assign it to the letter
+			except ValueError:  # If the message only containted "guess"
+				return await message.author.send("A letter or word was not specified")  # Send error message
 
-		if len(attempt) > 1:  # If the guess was a word
-			if attempt.lower() == self.word.get(message.author.id):  # Checks if the guess is correct
-				await message.author.send("The guess was correct!")  # Send final confirmation message
-				self.game_end(message.author.id)  # Ends the game
-				return  # Stops the function
-			else:
-				await message.author.send("You guessed the whole word... but it was wrong. Game over!")  # Send final confirmation message
-				self.game_end(message.author.id)  # Ends the game
-				return  # Stops the function
+			if attempt in self.guessed.get(message.author.id):  # If the guess has already been submitted
+				return await message.author.send("You have already guessed this!")  # Sends error message
 
-		if attempt in self.word.get(message.author.id):  # If the guess is correct
-			self.guessed[message.author.id].append(attempt)  # Adds to guessed list
-			self.hidden_word[message.author.id] = ""  # Clears the current hidden word
-			for index, char in enumerate(self.word.get(message.author.id)):  # For each character in the word
-				if char in self.guessed.get(message.author.id):  # If the character has been previouly guessed it will display it
-					self.hidden_word[message.author.id] += char  # Adds the character
-				elif char == " ":  # If a space
-					self.hidden_word[message.author.id] += " "  # Leave as space
-				elif char != " ":  # If not a space
-					self.hidden_word[message.author.id] += "\*"  # Hide character
-				else:  # Any other unknown circumstance
-					continue  # Continue loop
-			if self.hidden_word.get(message.author.id) == self.word.get(message.author.id):
-				self.game_end(message.author.id)
-				return await message.author.send("You win!")  # Sends the win condition message
-		else:  # If the guess is wrong and/or invalid
-			self.guessed[message.author.id].append(attempt)  # Add to guessed list
-			self.guesses[message.author.id] -= 1  # Removes a guess attmept as the guess was incorrect 
-			if self.guesses.get(message.author.id) == 0:  # The user has run out of guesses
-				self.game_end(message.author.id)  # Ends game
-				return await message.author.send("Game over! You lost!")  # Sends game over message
+			if len(attempt) > 1:  # If the guess was a word
+				if attempt.lower() == self.word.get(message.author.id):  # Checks if the guess is correct
+					await message.author.send("The guess was correct!")  # Send final confirmation message
+					self.game_end(message.author.id)  # Ends the game
+					return  # Stops the function
+				else:
+					await message.author.send(f"You guessed the whole word... but it was *{self.word.get(message.author.id)}*. Game over!")  # Send final confirmation message
+					self.game_end(message.author.id)  # Ends the game
+					return  # Stops the function
 
-		await self.message[message.author.id].delete()  # Deletes initial embed
-		self.message.pop(message.author.id)  # Clears dict value for embed
+			if attempt in self.word.get(message.author.id):  # If the guess is correct
+				self.guessed[message.author.id].append(attempt)  # Adds to guessed list
+				self.hidden_word[message.author.id] = ""  # Clears the current hidden word
+				for index, char in enumerate(self.word.get(message.author.id)):  # For each character in the word
+					if char in self.guessed.get(message.author.id):  # If the character has been previouly guessed it will display it
+						self.hidden_word[message.author.id] += char  # Adds the character
+					elif char == " ":  # If a space
+						self.hidden_word[message.author.id] += " "  # Leave as space
+					elif char != " ":  # If not a space
+						self.hidden_word[message.author.id] += "\*"  # Hide character
+					else:  # Any other unknown circumstance
+						continue  # Continue loop
+				if self.hidden_word.get(message.author.id) == self.word.get(message.author.id):
+					self.game_end(message.author.id)
+					return await message.author.send("You win!")  # Sends the win condition message
+			else:  # If the guess is wrong and/or invalid
+				self.guessed[message.author.id].append(attempt)  # Add to guessed list
+				self.guesses[message.author.id] -= 1  # Removes a guess attmept as the guess was incorrect 
+				if self.guesses.get(message.author.id) == 0:  # The user has run out of guesses
+					await message.author.send(f"The word was *{self.word.get(message.author.id)}*. Game over! You lost!")  # Sends game over message
+					self.game_end(message.author.id)  # Ends game
+					self.game_end(message.author.id)  # Ends game
 
-		embed = discord.Embed(color=discord.Color(65408))  # Creates inital embed with coloured sidebar
-		embed.description = f"Word: {self.hidden_word.get(message.author.id)}"  # Adds description
-		embed.add_field(name="Guesses", value=self.guesses.get(message.author.id), inline=False)  # Adds a filed
-		embed.add_field(name="Guessed", value=self.guessed.get(message.author.id), inline=False)  # Adds a filed
-		self.message[message.author.id] = await message.author.send(embed=embed)  # Sends and assigns the embed
+			await self.message[message.author.id].delete()  # Deletes initial embed
+			self.message.pop(message.author.id)  # Clears dict value for embed
 
+			embed = discord.Embed(color=discord.Color(65408))  # Creates inital embed with coloured sidebar
+			embed.description = f"Word: {self.hidden_word.get(message.author.id)}"  # Adds description
+			embed.add_field(name="Guesses", value=self.guesses.get(message.author.id), inline=False)  # Adds a filed
+			embed.add_field(name="Guessed", value=self.guessed.get(message.author.id), inline=False)  # Adds a filed
+			self.message[message.author.id] = await message.author.send(embed=embed)  # Sends and assigns the embed
 
+		elif message.content.lower().startswith("hint"):
+			if self.current_hint[message.author.id] > 3:
+				return await message.author.send("No more hints available")
+			try:
+				await message.author.send(self.hints.get(message.author.id)[self.current_hint.get(message.author.id)])
+				self.current_hint[message.author.id] += 1
+				return
+			except IndexError:
+				return await message.author.send("No hints available")
+		else:
+			return
 def setup(bot):  # Defines setup for command class
 	bot.add_cog(Hangman(bot))  # Adds the class to become a command class/cog

@@ -65,17 +65,17 @@ class MiscCommands(com.Cog):  # Creates class with inheritance from a module cla
 		if isinstance(error, com.CommandOnCooldown):
 			await ctx.send(f"This command is on cooldown. Try again in {readable_time(round(error.retry_after, 0))}")
 
-	@com.command()
-	async def dababy(self, ctx):
-		dababies = [511490437853478925, 266999593084911616]
+	@com.command()  # Command decorator  
+	async def dababy(self, ctx):  # Defines the function to run on command call
+		dababies = [511490437853478925, 266999593084911616]  
 		if ctx.author.id in dababies:
 			await ctx.send("You are dababy")
 		else:
 			await ctx.send("You are not dababy")
 
-	@com.command()
-	async def git(self, ctx):
-		await ctx.send(embed=d.Embed(color=d.Color(65408), title="https://github.com/Weetabicx/froge"))
+	@com.command()  # Command decorator
+	async def git(self, ctx):  #  Defines command 
+		await ctx.send(embed=d.Embed(color=d.Color(65408), title="https://github.com/Weetabicx/froge"))  # Sends github repo
 
 
 def setup(bot):  # Defines setup functiuon for cog

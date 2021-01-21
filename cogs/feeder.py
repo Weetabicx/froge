@@ -22,7 +22,7 @@ class feeder(commands.Cog):  # Defines the command class with inheritance
 	@tasks.loop(seconds=180)  # A loop that will run every 60 seconds
 	async def sololevelingRSS(self):  # Define function to run every 60 seconds
 
-		if datetime.now().strftime("%a") == "Sat":  # If the day is Wednesday
+		if datetime.now().strftime("%a") == "Wed":  # If the day is Wednesday
 
 			feed = feedparser.parse("https://mangadex.org/rss/d7UC82PWhmxqfktNsVcTzFpvD53ygXuE/manga_id/31477?h=0")  # Opens RSS feed for Solo Leveling
 			try:
@@ -45,7 +45,7 @@ class feeder(commands.Cog):  # Defines the command class with inheritance
 					New_data['sololeveling'] = 1 + last_chapter  # Populates data block
 					json.dump(New_data, outfile, indent=4)  # Writes to file
 
-			await self.channel.send(f"@eveyone {chapter.link}")  # Sends message to channel
+			await self.channel.send(f"@everyone {chapter.link}")  # Sends message to channel
 
 	@sololevelingRSS.before_loop  # Runs the defined function before the loop starts
 	async def before_sololevelingRSS(self):  # Defines function to run
