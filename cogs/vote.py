@@ -4,6 +4,9 @@ import discord as d
 import typing as t
 from datetime import datetime as dt, timedelta as td
 import re
+import matplotlib.pyplot as pyplot
+import os
+import numpy
 
 
 class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
@@ -29,6 +32,15 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 		self.against_vote.pop(guild_id)
 		self.has_voted.pop(guild_id)
 
+	def chart(self, fors: int, againsts: int, guild:int):
+		labels = numpy.array(['for', 'against'])
+		sizes = numpy.array([fors, againsts])
+		colors = numpy.array(['lime','maroon'])
+		pyplot.pie(sizes, labels=labels, colors=colors, autopct='%1.0f%%', shadow=True)
+		pyplot.axis('equal')
+
+		pyplot.savefig(f'chart_{guild}.png', transparent=True, facecolor='pink', bbox_inches='tight')
+
 	@com.group(case_insensative=True, invoke_without_command=True)  # Creates command group
 	async def vote(self, ctx, votes: t.Optional[int] = 10, timer: t.Optional[str] = "15m", *, subject: str):  # Creates function to become a command
 
@@ -43,11 +55,11 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 			unit == "m"
 
 		if unit == "hr" and number > 24:  # Checks for invalid time input
-			return await ctx.send(d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))  # Sends input rejections message
+			return await ctx.send(embed=d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))  # Sends input rejections message
 		elif unit == "m" and number < 10:# Checks for invalid time input
-			return await ctx.send(d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))  # Sends input rejections message
+			return await ctx.send(embed=d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))  # Sends input rejections message
 		elif unit == "d" and number != 1:# Checks for invalid time input
-			return await ctx.send(d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))  # Sends input rejections message
+			return await ctx.send(embed=d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))  # Sends input rejections message
 		else:  # If input is valid
 			if unit == "m":  # Checks unit of time
 				self.vote_timers[ctx.guild.id] = dt.utcnow() + td(minutes=number)
@@ -186,7 +198,13 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 					vote_embed.add_field(name="Against", value=against_votes, inline=True)  # Adds the against field which will be updated with each new vote
 					vote_embed.set_footer(text="Vote end time: {}".format(self.vote_timers[message.guild.id].strftime("%x %X")))  # Sends formatted time
 
+					self.chart(for_votes, against_votes, message.guild.id)
+					chart = d.File(f'chart_{message.guild.id}.png')
+
+					vote_embed.set_image(url=f'attachment://chart_{message.guild.id}.png')
+					await message.channel.send(file=chart, embed=vote_embed)
 					self.guild_vote_reset(message.guild.id)  # Resets values since the vote has ended
+					os.remove(f'chart_{message.guild.id}.png')
 
 				elif for_votes + against_votes < max_votes:  # If the vote is still ongoing
 					current_message = self.vote_msg.get(message.guild.id)  # Get's the current vote message
