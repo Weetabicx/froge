@@ -33,6 +33,7 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 		self.has_voted.pop(guild_id)
 
 	def chart(self, fors: int, againsts: int, guild:int):
+		"""Creates a pie chart showing the votes"""
 		labels = numpy.array(['for', 'against'])
 		sizes = numpy.array([fors, againsts])
 		colors = numpy.array(['lime','maroon'])
@@ -51,8 +52,10 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 		match = re.search(r"^(\d+)(d|hr|m|s)?$", timer, re.IGNORECASE)
 		number = int(match.group(1))  # Assigns the matched
 		unit = match.group(2)
+
 		if unit is None:
-			unit == "m"
+			unit = "m"
+		
 
 		if unit == "hr" and number > 24:  # Checks for invalid time input
 			return await ctx.send(embed=d.Embed(color=d.Color(65408), title="Invalid value, must be between '10m' and 24hr"))  # Sends input rejections message
@@ -132,7 +135,18 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 		vote_embed.add_field(name="Against", value=self.against_vote.get(ctx.guild.id), inline=True)  # Adds the against field which will be updated with each new vote
 		vote_embed.set_footer(text="Vote end time: {}".format(self.vote_timers[ctx.guild.id].strftime("%x %X")))
 
-		self.vote_msg[ctx.guild.id] = await ctx.send(embed=vote_embed)  # Sends the vote embed
+		if self.for_vote.get(ctx.guild.id) + self.against_vote.get(ctx.guild.id) == 0:
+			self.vote_msg[ctx.guild.id] = await ctx.send(embed=vote_embed)  # Sends the vote embed
+		else:
+			self.chart(self.for_vote.get(ctx.guild.id), self.against_vote.get(ctx.guild.id), ctx.guild.id)
+
+			chart = d.File(f'chart_{ctx.guild.id}.png')
+
+			vote_embed.set_image(url=f'attachment://chart_{ctx.guild.id}.png')
+					
+			self.vote_msg[ctx.guild.id] = await ctx.send(file=chart, embed=vote_embed)  # Sends the vote embed
+
+			os.remove(f'chart_{message.guild.id}.png')
 
 	@vote.command(aliases=["stop", "terminate"])  # Creates command group object with aliases
 	async def cancel(self, ctx):  # Defines function to become a command
