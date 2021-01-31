@@ -7,6 +7,7 @@ from discord.utils import get
 class Music(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
+		self.vc = {}
 
 	@commands.command()
 	async def play(self, ctx, url: str):
@@ -18,18 +19,18 @@ class Music(commands.Cog):
 			os.remove(fr'C:\Users\usywa\Videos\audio_files\{ctx.author.id}.mp3')
 			os.rename(audio, fr'C:\Users\usywa\Videos\audio_files\{ctx.author.id}.mp3')
 
-		file = File(fr'C:\Users\usywa\Videos\audio_files\{ctx.author.id}.mp3')
-		vc = ctx.author.voice.channel
-		print(vc)
+		self.vc[ctx.guild.id] = ctx.author.voice.channel
 
 		voice = get(self.bot.voice_clients, guild=ctx.guild)
-		print(voice)
-		await ctx.send(file=file)
 
 		if voice and voice.is_connected():
 			await voice.move_to(channel)
 		else:
-			voice = await vc.connect()
+			voice = await self.vc[ctx.guild.id].connect()
+
+	@commands.command()
+	async def die(self, ctx):
+		await ctx.voice_client.disconnect()
 
 def setup(bot):
 	bot.add_cog(Music(bot))
