@@ -138,15 +138,15 @@ class Vote(com.Cog):  # Creates a class with inheritance from 'Cog' class
 		if self.for_vote.get(ctx.guild.id) + self.against_vote.get(ctx.guild.id) == 0:
 			self.vote_msg[ctx.guild.id] = await ctx.send(embed=vote_embed)  # Sends the vote embed
 		else:
-			self.chart(self.for_vote.get(ctx.guild.id), self.against_vote.get(ctx.guild.id), ctx.guild.id)
+			self.chart(self.for_vote.get(ctx.guild.id), self.against_vote.get(ctx.guild.id), ctx.guild.id)  # Creates chart
 
-			chart = d.File(f'chart_{ctx.guild.id}.png')
+			chart = d.File(f'chart_{ctx.guild.id}.png')  # Set's chart as a discord File to add to embed
 
-			vote_embed.set_image(url=f'attachment://chart_{ctx.guild.id}.png')
+			vote_embed.set_image(url=f'attachment://chart_{ctx.guild.id}.png')  # Adds image to embed
 					
 			self.vote_msg[ctx.guild.id] = await ctx.send(file=chart, embed=vote_embed)  # Sends the vote embed
 
-			os.remove(f'chart_{message.guild.id}.png')
+			os.remove(f'chart_{message.guild.id}.png')  # Deletes file
 
 	@vote.command(aliases=["stop", "terminate"])  # Creates command group object with aliases
 	async def cancel(self, ctx):  # Defines function to become a command
