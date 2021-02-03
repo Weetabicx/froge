@@ -1,20 +1,52 @@
 from discord.ext import commands
 from discord import Embed, File, FFmpegOpusAudio, PCMVolumeTransformer
-from pytube import YouTube
 import os
 from discord.utils import get
 import ffmpeg
 import typing
+from math import floor
+import asyncio
+
 
 class Music(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 		self.vc = {}
-		self.current_track = {}
+		self.current = {}
+		self.queue = {}
+
+	def audio_download(url):
+
+	config = {
+		'format': 'bestaudio/best',
+			'outtmpl': name + '.mp3',
+			'noplaylist': True,
+			'continue_dl': True,
+			'postprocessors': [{
+				'key': 'FFmpegExtractAudio',
+				'preferredcodec': 'mp3',
+				'preferredquality': '192', }]
+	}
+
+	with youtube_dl.YoutubeDL(config) as ydl:
+		ydl.cache.remove()
+		info = ydl.extract_info(url, download=False)
+
+		title = info.get('title', None)
+		duration = info.get('duration', None)
+
+		ydl.download([url])
+		return title, duration
 
 	@commands.command()
 	async def play(self, ctx, url: typing.Optional[str] = None):
+		"""Downloads youtube url and plays video"""
 
+		if ctx.voice_client.is_playing():
+			self.queue[ctx.guild.id] = []
+			self.queue[ctx.guild.id].append(url)
+
+		# Unpauses the player if was paused
 		try:
 			if ctx.voice_client.is_paused():
 				ctx.voice_client.resume()
@@ -24,15 +56,9 @@ class Music(commands.Cog):
 			pass
 
 		if url == None:
-			return await ctx.send('No url specified')
+			return await ctx.send('No url specified')  # If no url is provided
 
-		download = YouTube(url)
-		audio = download.streams.filter(only_audio=True).first().download(r'C:\Users\usywa\Videos\audio_files')
-		try:
-			os.rename(audio, fr'C:\Users\usywa\Videos\audio_files\{ctx.author.id}.mp3')
-		except FileExistsError:
-			os.remove(fr'C:\Users\usywa\Videos\audio_files\{ctx.author.id}.mp3')
-			os.rename(audio, fr'C:\Users\usywa\Videos\audio_files\{ctx.author.id}.mp3')
+		audio_download(url)
 
 		try:
 			self.vc[ctx.guild.id] = ctx.author.voice.channel
@@ -48,21 +74,33 @@ class Music(commands.Cog):
 
 		await ctx.guild.change_voice_state(channel=self.vc[ctx.guild.id], self_mute=False, self_deaf=True)
 
-		ctx.voice_client.play(FFmpegOpusAudio(fr'C:\Users\usywa\Videos\audio_files\{ctx.author.id}.mp3'))
+		queue_value = self.current.get(ctx.guild.id) or 0
+		ctx.voice_client.play(FFmpegOpusAudio(fr'C:\Users\usywa\Videos\audio_files\{ctx.guild.id}\{queue_value}.mp3'))
+		self.current_number[ctx.guild.id] = 0
+
 
 	@commands.command()
 	async def die(self, ctx):
+		"""Leaves voice channel"""
 		await ctx.voice_client.disconnect()
 		await ctx.message.add_reaction(emoji='✅')
 
 	@commands.command(aliases=['stop'])
 	async def pause(self, ctx):
+		"""pauses the currently playing song"""
 		ctx.voice_client.pause()
 		await ctx.message.add_reaction(emoji='⏸️')
 
 	@commands.command()
-	async def volume(self, ctx, value: float):
-		print(ctx.voice_client.source.volume)
+	async def volume(self, ctx):
+		await self.call(ctx)
+
+    @commands.is_owner()  # Runs a commands.Check
+	@commands.command()
+	async def queue_player(self, ctx):
+
+
+		
 
 def setup(bot):
 	bot.add_cog(Music(bot))
