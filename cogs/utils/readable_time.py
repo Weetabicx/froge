@@ -32,5 +32,3 @@ def readable_time(inital):
 		return f'{hours} hour(s), {minutes} minute(s), {seconds} second(s)'
 	else:
 		return f"{days} day(s), {hours} hour(s), {minutes} minute(s), {seconds} second(s)"
-
-
