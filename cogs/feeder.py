@@ -28,7 +28,7 @@ class feeder(commands.Cog):  # Defines the command class with inheritance
 			try:
 				chapter = feed["entries"][1]  # Get's the latest chapter
 			except IndexError:
-				print("Website issues.") 
+				print(r"Website issues.| {datetime.utcnow().strftime('%c')}") 
 				return
 
 			match = re.search(r"(?i)(chapter \d+)", chapter.title, re.IGNORECASE)  # Use REGEX to break up chapter title

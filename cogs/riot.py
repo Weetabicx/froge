@@ -9,14 +9,17 @@ import os
 class riot(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
-		self.get_riot_api()
+		self.get_riot_api()  # Get#s the riot API key
 
 	def get_riot_api(self):
+		"""Loads riot API key from config file"""
 		with open('config.json', 'r') as config:
 			config = json.load(config)
 			self.api_key = config['riot-key']
 
 	def sorting(self, champ:list, points:list, mastery:list):
+		"""The data recieved for mastery is champion alphabetical meaning it's not in the order of mastery points
+		This sorts the values of the mastery array and saves their index and applies this to the parallel arrays"""
 
 		highest = points[0]
 		highest_pos = 0
