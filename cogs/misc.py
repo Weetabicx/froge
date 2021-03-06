@@ -77,10 +77,6 @@ class MiscCommands(com.Cog):  # Creates class with inheritance from a module cla
 	async def git(self, ctx):  #  Defines command 
 		await ctx.send(embed=d.Embed(color=d.Color(65408), title="https://github.com/Weetabicx/froge"))  # Sends github repo
 
-	@com.command()
-	async def delete(self, ctx):
-		await ctx.message.delete()
-
 
 def setup(bot):  # Defines setup functiuon for cog
 	bot.add_cog(MiscCommands(bot))  # Specifies class to be added as a cog

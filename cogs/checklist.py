@@ -1,5 +1,5 @@
 from discord.ext import commands
-from discord import Embed
+from discord import Embed, tasks
 import typing
 
 class Checklist(commands.Cog):  # Creating class with comannds.Cog inheritance
@@ -18,7 +18,9 @@ class Checklist(commands.Cog):  # Creating class with comannds.Cog inheritance
 
 		embed = Embed()
 		for x in range(len(self.list.get(ctx.author.id))):
-			embed.add_field(name=self.list.get(ctx.author.id)[x]['title'], value=self.list.get(ctx.author.id)[x]['description'], inline=True)
+			value = self.list.get(ctx.author.id)[x]['description']
+			name = self.list.get(ctx.author.id)[x]['title']
+			embed.add_field(name=f'**{name}**', value=f'```{value}```', inline=False)
 
 		await ctx.send(embed=embed)
 
@@ -69,7 +71,8 @@ class Checklist(commands.Cog):  # Creating class with comannds.Cog inheritance
 			if len(self.list.get(ctx.author.id)) == 0:
 				self.list.pop(ctx.author.id)
 
-		await ctx.message.add_reaction(emoji='✅')  # Confirms to the user the command has been used succesfully 
+		await ctx.message.add_reaction(emoji='✅')  # Confirms to the user the command has been used succesfully
+
 
 def setup(bot):
 	bot.add_cog(Checklist(bot))

@@ -1,5 +1,5 @@
 # Imports required modules with aliases
-from discord.ext import commands as com
+from discord.ext import commands as com, tasks
 import discord as d
 import typing as t
 from datetime import datetime as dt, timedelta as td
