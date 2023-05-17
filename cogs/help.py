@@ -42,5 +42,5 @@ class Help(com.Cog):  # Creates a class with inheritance from a module class
 		user.add_field(name="Account creation date", value="age", inline=False)  # Adds a filed within the user embed
 		user.add_field(name="Get user id", value="uid {@specified_user, defaults to command invoker}", inline=False)  # Adds a filed within the user embed
 		
-def setup(bot):  # Define setup function
-	bot.add_cog(Help(bot))  # Specifies the class which to add as a cog
+async def setup(bot):  # Define setup function
+	await bot.add_cog(Help(bot))  # Specifies the class which to add as a cog
